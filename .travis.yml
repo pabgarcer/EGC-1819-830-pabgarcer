@@ -22,7 +22,7 @@ before_script:
   - psql -U postgres -c "ALTER USER guarrizas CREATEDB"
   - python manage.py migrate
 script:
-  - python3 ./manage.py test store --keepdb
+  - if [[ $IS_MASTER == "true" ]]; then python manage.py test store --keepdb; fi;
 deploy:
   provider: heroku
   app: guarrizas-postproc
