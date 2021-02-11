@@ -1,0 +1,30 @@
+language: python 
+python: 
+- "3.6"
+env: 
+- DJANGO=2.0 DB=test_guarrizas_db
+dist: xenial
+services:
+  - postgresql
+addons:
+  postgresql: "9.6"
+global:
+  - PGPORT=5432
+before_install:
+- cd decide
+install:
+  - pip install -r ../requirements.txt
+  - pip install codacy-coverage
+before_script:
+  - cp travis_local_settings.py local_settings.py
+  - psql -U postgres -c "create user guarrizas password 'guarrizas'"
+  - psql -U postgres -c "create database test_guarrizas_db owner guarrizas"
+  - psql -U postgres -c "ALTER USER guarrizas CREATEDB"
+  - python manage.py migrate
+script:
+  - python3 ./manage.py test store --keepdb
+deploy:
+  provider: heroku
+  app: guarrizas-postproc
+  strategy: git
+  api_key: $HEROKU_AUTH_TOKEN
